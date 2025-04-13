@@ -155,8 +155,67 @@ const TabPages: React.FC = () => {
   const activeTabData = tabs.find(tab => tab.id === activeTab);
 
   return (
-    <div className="w-full max-w-5xl mx-auto my-8">
-      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">导航分类</h2>
+    <div className="w-full max-w-5xl mx-auto my-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-bold text-gray-800 dark:text-white">导航分类</h2>
+        
+        {/* 添加新标签按钮 */}
+        {!isLoading && !isAddingTab && (
+          <button
+            className="flex items-center px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+            onClick={handleAddTab}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            添加标签
+          </button>
+        )}
+      </div>
+
+      {/* 添加新标签输入框 */}
+      {isAddingTab && (
+        <div className="flex items-center space-x-2 mb-3">
+          <input
+            type="text"
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            placeholder="输入标签名称..."
+            value={newTabTitle}
+            onChange={(e) => setNewTabTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSaveNewTab();
+              }
+            }}
+          />
+          <button
+            className="px-3 py-1.5 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+            onClick={handleSaveNewTab}
+          >
+            保存
+          </button>
+          <button
+            className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+            onClick={() => {
+              setIsAddingTab(false);
+              setNewTabTitle('');
+            }}
+          >
+            取消
+          </button>
+        </div>
+      )}
 
       {/* 标签页导航 */}
       {isClient ? (
@@ -166,12 +225,12 @@ const TabPages: React.FC = () => {
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="flex overflow-x-auto pb-2 mb-4"
+                className="flex overflow-x-auto pb-2 mb-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
                 suppressHydrationWarning
               >
                 {isLoading ? (
-                  <div className="flex justify-center items-center h-10 w-full">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                  <div className="flex justify-center items-center h-8 w-full">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
                   </div>
                 ) : (
                   <>
@@ -182,7 +241,7 @@ const TabPages: React.FC = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`px-4 py-2 mr-2 rounded-md cursor-pointer ${
+                            className={`px-3 py-1.5 mr-1.5 rounded-md cursor-pointer text-sm font-medium ${
                               activeTab === tab.id
                                 ? 'bg-blue-500 text-white'
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -203,17 +262,17 @@ const TabPages: React.FC = () => {
           </Droppable>
         </DragDropContext>
       ) : (
-        <div className="flex overflow-x-auto pb-2 mb-4">
+        <div className="flex overflow-x-auto pb-2 mb-3">
           {isLoading ? (
-            <div className="flex justify-center items-center h-10 w-full">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+            <div className="flex justify-center items-center h-8 w-full">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
             </div>
           ) : (
             <>
               {tabs.map((tab) => (
                 <div
                   key={tab.id}
-                  className={`px-4 py-2 mr-2 rounded-md cursor-pointer ${
+                  className={`px-3 py-1.5 mr-1.5 rounded-md cursor-pointer text-sm font-medium ${
                     activeTab === tab.id
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -228,80 +287,22 @@ const TabPages: React.FC = () => {
         </div>
       )}
 
-      {/* 添加新标签按钮 */}
-      {!isLoading && (
-        <div className="mb-4">
-          {isAddingTab ? (
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="输入标签名称..."
-                value={newTabTitle}
-                onChange={(e) => setNewTabTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSaveNewTab();
-                  }
-                }}
-              />
-              <button
-                className="px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                onClick={handleSaveNewTab}
-              >
-                保存
-              </button>
-              <button
-                className="px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-                onClick={() => {
-                  setIsAddingTab(false);
-                  setNewTabTitle('');
-                }}
-              >
-                取消
-              </button>
-            </div>
-          ) : (
-            <button
-              className="flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              onClick={handleAddTab}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              添加新标签
-            </button>
-          )}
-        </div>
-      )}
-
       {/* 标签页内容 */}
       {isLoading ? (
-        <div className="flex justify-center items-center h-40">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-500"></div>
         </div>
       ) : activeTabData ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
           {activeTabData.sites.map((site: any) => (
             <a
               key={site.id}
               href={site.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="flex flex-col items-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
-              <div className="w-12 h-12 mb-2 relative">
+              <div className="w-10 h-10 mb-1.5 relative">
                 <Image
                   src={iconErrors[site.id] ? defaultIcon : `${new URL(site.url).origin}/favicon.ico`}
                   alt={site.title}
@@ -310,14 +311,14 @@ const TabPages: React.FC = () => {
                   onError={() => handleIconError(site.id)}
                 />
               </div>
-              <span className="text-sm text-center text-gray-700 dark:text-gray-300 truncate w-full">
+              <span className="text-xs text-center text-gray-700 dark:text-gray-300 truncate w-full">
                 {site.title}
               </span>
             </a>
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
           请选择一个标签页
         </div>
       )}
