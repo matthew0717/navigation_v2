@@ -1,0 +1,162 @@
+{
+  "user": {
+    "isLoggedIn": false,
+    "preferences": {
+      "theme": "light",
+      "searchEngine": "bing",
+      "hotSitesLayout": "3rows"
+    }
+  },
+  "searchEngines": [
+    {
+      "id": "bing",
+      "name": "必应",
+      "url": "https://cn.bing.com/search?q=",
+      "icon": "https://cn.bing.com/favicon.ico"
+    },
+    {
+      "id": "baidu",
+      "name": "百度",
+      "url": "https://www.baidu.com/s?wd=",
+      "icon": "https://www.baidu.com/favicon.ico"
+    },
+    {
+      "id": "google",
+      "name": "谷歌",
+      "url": "https://www.google.com/search?q=",
+      "icon": "https://www.google.com/favicon.ico"
+    }
+  ],
+  "hotSites": [
+    {
+      "id": "1",
+      "title": "知乎",
+      "url": "https://www.zhihu.com",
+      "icon": "https://www.zhihu.com/favicon.ico",
+      "category": "社区"
+    },
+    {
+      "id": "2",
+      "title": "哔哩哔哩",
+      "url": "https://www.bilibili.com",
+      "icon": "https://www.bilibili.com/favicon.ico",
+      "category": "视频"
+    },
+    {
+      "id": "3",
+      "title": "微博",
+      "url": "https://weibo.com",
+      "icon": "https://weibo.com/favicon.ico",
+      "category": "社交"
+    },
+    {
+      "id": "4",
+      "title": "豆瓣",
+      "url": "https://www.douban.com",
+      "icon": "https://www.douban.com/favicon.ico",
+      "category": "文化"
+    },
+    {
+      "id": "5",
+      "title": "淘宝",
+      "url": "https://www.taobao.com",
+      "icon": "https://www.taobao.com/favicon.ico",
+      "category": "购物"
+    },
+    {
+      "id": "6",
+      "title": "京东",
+      "url": "https://www.jd.com",
+      "icon": "https://www.jd.com/favicon.ico",
+      "category": "购物"
+    },
+    {
+      "id": "7",
+      "title": "网易",
+      "url": "https://www.163.com",
+      "icon": "https://www.163.com/favicon.ico",
+      "category": "门户"
+    },
+    {
+      "id": "8",
+      "title": "腾讯",
+      "url": "https://www.qq.com",
+      "icon": "https://www.qq.com/favicon.ico",
+      "category": "门户"
+    }
+  ],
+  "tabs": [
+    {
+      "id": "work",
+      "title": "工作",
+      "sites": [
+        {
+          "id": "9",
+          "title": "GitHub",
+          "url": "https://github.com",
+          "icon": "https://github.com/favicon.ico"
+        },
+        {
+          "id": "10",
+          "title": "Stack Overflow",
+          "url": "https://stackoverflow.com",
+          "icon": "https://stackoverflow.com/favicon.ico"
+        },
+        {
+          "id": "11",
+          "title": "掘金",
+          "url": "https://juejin.cn",
+          "icon": "https://juejin.cn/favicon.ico"
+        }
+      ]
+    },
+    {
+      "id": "entertainment",
+      "title": "娱乐",
+      "sites": [
+        {
+          "id": "12",
+          "title": "优酷",
+          "url": "https://www.youku.com",
+          "icon": "https://www.youku.com/favicon.ico"
+        },
+        {
+          "id": "13",
+          "title": "爱奇艺",
+          "url": "https://www.iqiyi.com",
+          "icon": "https://www.iqiyi.com/favicon.ico"
+        },
+        {
+          "id": "14",
+          "title": "腾讯视频",
+          "url": "https://v.qq.com",
+          "icon": "https://v.qq.com/favicon.ico"
+        }
+      ]
+    },
+    {
+      "id": "study",
+      "title": "学习",
+      "sites": [
+        {
+          "id": "15",
+          "title": "中国大学MOOC",
+          "url": "https://www.icourse163.org",
+          "icon": "https://www.icourse163.org/favicon.ico"
+        },
+        {
+          "id": "16",
+          "title": "菜鸟教程",
+          "url": "https://www.runoob.com",
+          "icon": "https://www.runoob.com/favicon.ico"
+        },
+        {
+          "id": "17",
+          "title": "W3School",
+          "url": "https://www.w3school.com.cn",
+          "icon": "https://www.w3school.com.cn/favicon.ico"
+        }
+      ]
+    }
+  ]
+} 

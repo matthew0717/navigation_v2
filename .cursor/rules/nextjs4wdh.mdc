@@ -1,0 +1,20 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 代码中要求良好的注释
+变量注释
+函数注释
+引用注释
+使用场景注释
+
+# 模拟数据
+以JSON格式构建虚拟数据在数据文件夹api/data
+配置或者展示需要的数据，虚拟api进行访问获取，
+配置或其他修改后的数据，以json格式通过api保存到文件中
+
+# 响应式适应 Web & 移动端 H5
+
+# 导航网站清单的icon 采用默认 https://host/favicon.ico进行配置
+# 不使用谷歌和其他中国不能访问的资源，例如谷歌字体，cdnjs, unpkg/npm, jsdelivr cdn
