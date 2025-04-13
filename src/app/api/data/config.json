@@ -3,7 +3,7 @@
     "isLoggedIn": false,
     "preferences": {
       "theme": "light",
-      "searchEngine": "bing",
+      "searchEngine": "baidu",
       "hotSitesLayout": "3rows"
     }
   },
@@ -159,4 +159,4 @@
       ]
     }
   ]
-} 
+}
