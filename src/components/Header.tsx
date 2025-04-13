@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useI18n } from "@/i18n";
+import { useUser } from "@/contexts/UserContext";
 import LanguageSwitcher from "./LanguageSwitcher";
+import AuthModal from "./auth/AuthModal";
+import UserAvatar from "./UserAvatar";
 
 /**
  * 顶部菜单区组件
@@ -13,8 +16,11 @@ import LanguageSwitcher from "./LanguageSwitcher";
  */
 export default function Header() {
   const { t } = useI18n();
+  const { user, login, register, verifyCode, resetPassword, setPassword, logout } = useUser();
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [activeChannel, setActiveChannel] = useState<'image' | 'video'>('image');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   /**
    * 切换菜单收缩状态
@@ -29,6 +35,119 @@ export default function Header() {
    */
   const switchChannel = (channel: 'image' | 'video') => {
     setActiveChannel(channel);
+  };
+
+  /**
+   * 打开认证模态框
+   */
+  const openAuthModal = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  /**
+   * 关闭认证模态框
+   */
+  const closeAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
+  /**
+   * 处理登录
+   * @param email 邮箱
+   * @param password 密码
+   */
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      await login(email, password);
+      closeAuthModal();
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  };
+
+  /**
+   * 处理注册
+   * @param email 邮箱
+   * @param name 姓名
+   */
+  const handleRegister = async (email: string, name: string) => {
+    try {
+      await register(email, name);
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
+  };
+
+  /**
+   * 处理验证码验证
+   * @param email 邮箱
+   * @param code 验证码
+   */
+  const handleVerifyCode = async (email: string, code: string) => {
+    try {
+      await verifyCode(email, code);
+      closeAuthModal();
+    } catch (error) {
+      console.error('Verification failed:', error);
+    }
+  };
+
+  /**
+   * 处理重置密码
+   * @param email 邮箱
+   */
+  const handleResetPassword = async (email: string) => {
+    try {
+      await resetPassword(email);
+    } catch (error) {
+      console.error('Password reset failed:', error);
+    }
+  };
+
+  /**
+   * 处理设置密码
+   * @param email 邮箱
+   * @param password 密码
+   */
+  const handleSetPassword = async (email: string, password: string) => {
+    try {
+      await setPassword(email, password);
+      closeAuthModal();
+    } catch (error) {
+      console.error('Password setting failed:', error);
+    }
+  };
+
+  /**
+   * 处理登出
+   */
+  const handleLogout = () => {
+    logout();
+  };
+
+  /**
+   * 获取用户首字母
+   * @param name 用户名
+   * @returns 首字母
+   */
+  const getUserInitial = (name: string): string => {
+    return name.charAt(0).toUpperCase();
+  };
+
+  /**
+   * 获取随机背景颜色
+   * @param name 用户名
+   * @returns 背景颜色类名
+   */
+  const getAvatarBgColor = (name: string): string => {
+    const colors = [
+      'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 
+      'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'
+    ];
+    
+    // 使用用户名生成一个固定的索引
+    const index = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+    return colors[index];
   };
 
   return (
@@ -85,13 +204,41 @@ export default function Header() {
             </svg>
           </button>
 
-          {/* 登录/注册按钮 */}
-          <button 
-            className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-            aria-label={t('header.buttons.login')}
-          >
-            {t('header.buttons.login')}
-          </button>
+          {/* 用户菜单 */}
+          {user ? (
+            <div className="relative">
+              <button 
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label={user.name}
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              >
+                <UserAvatar user={user} size="md" />
+              </button>
+              
+              {/* 下拉菜单 */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10">
+                  <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    {user.email}
+                  </div>
+                  <button 
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    onClick={handleLogout}
+                  >
+                    {t('auth.logout')}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button 
+              className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+              onClick={openAuthModal}
+              aria-label={t('header.buttons.login')}
+            >
+              {t('header.buttons.login')}
+            </button>
+          )}
 
           {/* 设置按钮 */}
           <button 
@@ -119,6 +266,17 @@ export default function Header() {
           </button>
         </div>
       </div>
+
+      {/* 认证模态框 */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={closeAuthModal}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        onVerifyCode={handleVerifyCode}
+        onResetPassword={handleResetPassword}
+        onSetPassword={handleSetPassword}
+      />
     </header>
   );
 } 

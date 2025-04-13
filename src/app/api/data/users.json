@@ -1,0 +1,17 @@
+{
+  "users": [
+    {
+      "id": "31542e08-0a8b-48ad-8262-ada43daa9b33",
+      "email": "matthewxu@live.com",
+      "name": "matthewxu",
+      "verificationCode": "763272",
+      "codeExpiry": "2025-04-13T15:28:15.144Z",
+      "isVerified": true,
+      "createdAt": "2025-04-13T15:18:15.144Z",
+      "updatedAt": "2025-04-13T15:20:23.468Z",
+      "password": "$2b$10$y5SwsAj4rJmaDdhIaoTp/.UeeBAQuz5GR3YXke2a0ayZkScY5Fypu",
+      "lastLogin": "2025-04-13T15:41:27.033Z"
+    }
+  ],
+  "verificationCodes": []
+}
