@@ -21,6 +21,12 @@ export default {
       collapse: 'Collapse Menu',
     },
   },
+  scenes: {
+    minimal: 'Minimal',
+    meditation: 'Meditation',
+    custom: 'Custom',
+    recommended: 'Recommended',
+  },
   searchBox: {
     title: 'Search',
     placeholder: 'Enter search content...',

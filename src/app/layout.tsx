@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { I18nProvider } from "@/i18n";
 import Header from "@/components/Header";
+import SceneButtons from "@/components/SceneButtons";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <main className="min-h-screen">
             {children}
           </main>
+          <SceneButtons />
         </I18nProvider>
       </body>
     </html>

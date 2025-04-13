@@ -18,4 +18,4 @@ alwaysApply: true
 
 # 导航网站清单的icon 采用默认 https://host/favicon.ico进行配置
 # 不使用谷歌和其他中国不能访问的资源，例如谷歌字体，cdnjs, unpkg/npm, jsdelivr cdn
-# 一直支持多语言模式进行编码
+# 每次增加代码时候，需要支持多语言模式

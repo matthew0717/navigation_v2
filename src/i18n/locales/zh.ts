@@ -21,6 +21,12 @@ export default {
       collapse: '收缩菜单',
     },
   },
+  scenes: {
+    minimal: '极简模式',
+    meditation: '冥想模式',
+    custom: '自定义模式',
+    recommended: '常用推荐',
+  },
   searchBox: {
     title: '搜索',
     placeholder: '输入搜索内容...',

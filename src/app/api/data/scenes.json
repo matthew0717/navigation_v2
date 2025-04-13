@@ -1,0 +1,32 @@
+{
+  "scenes": [
+    {
+      "id": "minimal",
+      "icon": "🌱",
+      "label": "极简模式",
+      "active": true,
+      "description": "简洁的界面，专注于核心功能"
+    },
+    {
+      "id": "meditation",
+      "icon": "🧘",
+      "label": "冥想模式",
+      "active": false,
+      "description": "平静的界面，适合冥想和放松"
+    },
+    {
+      "id": "custom",
+      "icon": "🎨",
+      "label": "自定义模式",
+      "active": false,
+      "description": "完全自定义的界面，按需配置"
+    },
+    {
+      "id": "recommended",
+      "icon": "⭐",
+      "label": "常用推荐",
+      "active": false,
+      "description": "基于用户习惯的智能推荐"
+    }
+  ]
+} 
