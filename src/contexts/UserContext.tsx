@@ -18,16 +18,15 @@ export interface User {
 /**
  * 用户上下文接口
  */
-interface UserContextType {
+export interface UserContextType {
   user: User | null;
-  isLoading: boolean;
-  error: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, name: string, password: string, confirmPassword: string) => Promise<void>;
-  verifyCode: (email: string, code: string) => Promise<{ success: boolean; message: string; user?: User; token?: string }>;
-  setPassword: (email: string, password: string) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updatePassword: (email: string, code: string, password: string) => Promise<void>;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string; user?: User }>;
+  register: (email: string, name: string, password: string, confirmPassword: string) => Promise<{ success: boolean; message: string }>;
+  verifyCode: (email: string, code: string) => Promise<{ success: boolean; message: string; user?: User; randomPassword?: string }>;
+  resetPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  setPassword: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  updatePassword: (email: string, oldPassword: string, newPassword: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   logout: () => void;
 }
 
@@ -49,7 +48,7 @@ interface UserProviderProps {
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const { t } = useI18n();
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   /**
@@ -67,7 +66,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       } catch (error) {
         console.error('加载用户信息失败:', error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     
@@ -80,35 +79,42 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    * @param password 密码
    */
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.error || t('auth.loginError'));
+        return { 
+          success: false, 
+          message: data.error || t('auth.error.loginFailed'),
+          user: undefined 
+        };
       }
-      
+
       // 保存用户信息和令牌
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('token', data.token);
       
       setUser(data.user);
+      
+      return { 
+        success: true, 
+        message: t('auth.loginSuccess'),
+        user: data.user,
+        token: data.token
+      };
     } catch (error) {
       console.error('登录失败:', error);
-      setError(error instanceof Error ? error.message : t('auth.loginError'));
-      throw error;
-    } finally {
-      setIsLoading(false);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : t('auth.error.loginFailed'),
+        user: undefined 
+      };
     }
   };
 
@@ -120,10 +126,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    * @param confirmPassword 确认密码
    */
   const register = async (email: string, name: string, password: string, confirmPassword: string) => {
-    setIsLoading(true);
-    setError(null);
-    
+    console.log('开始注册流程:', { email, name });
     try {
+      console.log('发送注册请求...');
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
@@ -131,20 +136,27 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         },
         body: JSON.stringify({ email, name, password, confirmPassword }),
       });
-      
+
+      console.log('注册请求响应状态:', response.status);
       const data = await response.json();
-      
+      console.log('注册请求响应数据:', data);
+
       if (!response.ok) {
-        throw new Error(data.error || t('auth.registerError'));
+        console.log('注册失败:', data.error || '未知错误');
+        return { 
+          success: false, 
+          message: data.error || t('auth.error.registerFailed')
+        };
       }
-      
-      return data;
+
+      console.log('注册成功，等待验证码验证');
+      return { success: true, message: t('auth.registerSuccess') };
     } catch (error) {
-      console.error('注册失败:', error);
-      setError(error instanceof Error ? error.message : t('auth.registerError'));
-      throw error;
-    } finally {
-      setIsLoading(false);
+      console.log('注册过程发生错误:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : t('auth.error.registerFailed')
+      };
     }
   };
 
@@ -154,10 +166,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    * @param code 验证码
    */
   const verifyCode = async (email: string, code: string) => {
-    setIsLoading(true);
-    setError(null);
-    
+    console.log('开始验证码验证流程:', { email, code });
     try {
+      console.log('发送验证码验证请求...');
       const response = await fetch('/api/auth/verify', {
         method: 'POST',
         headers: {
@@ -165,27 +176,39 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         },
         body: JSON.stringify({ email, code }),
       });
-      
+
+      console.log('验证码验证请求响应状态:', response.status);
       const data = await response.json();
-      
+      console.log('验证码验证请求响应数据:', data);
+
       if (!response.ok) {
-        throw new Error(data.error || t('auth.verifyError'));
+        console.log('验证码验证失败:', data.error || '未知错误');
+        return { 
+          success: false, 
+          message: data.error || t('auth.error.verifyFailed')
+        };
       }
+
+      console.log('验证码验证成功');
       
-      // 如果验证成功，保存用户信息和令牌
-      if (data.success && data.user && data.token) {
+      // 如果验证成功且有用户信息，设置登录状态
+      if (data.user) {
         localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
         setUser(data.user);
       }
-      
-      return data;
+
+      return { 
+        success: true, 
+        message: t('auth.verifySuccess'),
+        user: data.user,
+        randomPassword: data.randomPassword
+      };
     } catch (error) {
-      console.error('验证码验证失败:', error);
-      setError(error instanceof Error ? error.message : t('auth.verifyError'));
-      throw error;
-    } finally {
-      setIsLoading(false);
+      console.log('验证码验证过程发生错误:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : t('auth.error.verifyFailed')
+      };
     }
   };
 
@@ -195,25 +218,37 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    * @param password 密码
    */
   const setPassword = async (email: string, password: string) => {
+    setLoading(true);
+    setError(null);
+    
     try {
       const response = await fetch('/api/auth/set-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || '设置密码失败');
+        return { 
+          success: false, 
+          message: data.error || t('auth.error.setPasswordFailed')
+        };
       }
 
-      const data = await response.json();
-      return data;
+      return { 
+        success: true, 
+        message: t('auth.setPasswordSuccess')
+      };
     } catch (error) {
       console.error('设置密码失败:', error);
-      throw error;
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : t('auth.error.setPasswordFailed')
+      };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -222,42 +257,48 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    * @param email 邮箱
    */
   const resetPassword = async (email: string) => {
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
     
     try {
       const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.error || t('auth.resetPasswordError'));
+        return { 
+          success: false, 
+          message: data.error || t('auth.error.resetPasswordFailed')
+        };
       }
-      
-      return data;
+
+      return { 
+        success: true, 
+        message: t('auth.resetPasswordSuccess')
+      };
     } catch (error) {
-      console.error('找回密码失败:', error);
-      setError(error instanceof Error ? error.message : t('auth.resetPasswordError'));
-      throw error;
+      console.error('重置密码失败:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : t('auth.error.resetPasswordFailed')
+      };
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   /**
    * 更新密码
    * @param email 邮箱
-   * @param code 验证码
-   * @param password 密码
+   * @param oldPassword 旧密码
+   * @param newPassword 新密码
    */
-  const updatePassword = async (email: string, code: string, password: string) => {
-    setIsLoading(true);
+  const updatePassword = async (email: string, oldPassword: string, newPassword: string) => {
+    setLoading(true);
     setError(null);
     
     try {
@@ -266,7 +307,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, code, password }),
+        body: JSON.stringify({ email, oldPassword, newPassword }),
       });
       
       const data = await response.json();
@@ -281,7 +322,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       setError(error instanceof Error ? error.message : t('auth.updatePasswordError'));
       throw error;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -299,7 +340,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    */
   const value = {
     user,
-    isLoading,
+    loading,
     error,
     login,
     register,

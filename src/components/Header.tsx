@@ -58,11 +58,17 @@ export default function Header() {
    */
   const handleLogin = async (email: string, password: string) => {
     try {
-      await login(email, password);
-      closeAuthModal();
+      const result = await login(email, password);
+      if (result.success) {
+        setIsAuthModalOpen(false);
+      }
+      return result;
     } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
+      console.error('登录失败:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : t('auth.error.loginFailed')
+      };
     }
   };
 
@@ -75,9 +81,14 @@ export default function Header() {
    */
   const handleRegister = async (email: string, name: string, password: string, confirmPassword: string) => {
     try {
-      await register(email, name, password, confirmPassword);
+      const result = await register(email, name, password, confirmPassword);
+      return result;
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('注册失败:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : t('auth.error.registerFailed')
+      };
     }
   };
 
@@ -85,18 +96,16 @@ export default function Header() {
    * 处理验证码验证
    * @param email 邮箱
    * @param code 验证码
-   * @returns 验证结果
    */
   const handleVerifyCode = async (email: string, code: string) => {
     try {
-      const result = await verifyCode(email, code);
-      if (result.success) {
-        closeAuthModal();
-      }
-      return result;
+      return await verifyCode(email, code);
     } catch (error) {
-      console.error('Verification failed:', error);
-      return { success: false, message: error instanceof Error ? error.message : '验证失败' };
+      console.error('验证失败:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : t('auth.error.verifyFailed')
+      };
     }
   };
 
@@ -106,9 +115,13 @@ export default function Header() {
    */
   const handleResetPassword = async (email: string) => {
     try {
-      await resetPassword(email);
+      return await resetPassword(email);
     } catch (error) {
-      console.error('Password reset failed:', error);
+      console.error('重置密码失败:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : t('auth.error.resetPasswordFailed')
+      };
     }
   };
 
@@ -119,10 +132,13 @@ export default function Header() {
    */
   const handleSetPassword = async (email: string, password: string) => {
     try {
-      await setPassword(email, password);
-      closeAuthModal();
+      return await setPassword(email, password);
     } catch (error) {
-      console.error('Password setting failed:', error);
+      console.error('设置密码失败:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : t('auth.error.setPasswordFailed')
+      };
     }
   };
 

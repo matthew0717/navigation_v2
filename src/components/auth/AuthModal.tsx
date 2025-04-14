@@ -12,11 +12,11 @@ import toast from 'react-hot-toast';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLogin: (email: string, password: string) => Promise<void>;
-  onRegister: (email: string, name: string, password: string, confirmPassword: string) => Promise<void>;
-  onVerifyCode: (email: string, code: string) => Promise<{ success: boolean; message: string; user?: User; token?: string }>;
-  onResetPassword: (email: string) => Promise<void>;
-  onSetPassword: (email: string, password: string) => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<{ success: boolean; message: string; user?: User }>;
+  onRegister: (email: string, name: string, password: string, confirmPassword: string) => Promise<{ success: boolean; message: string }>;
+  onVerifyCode: (email: string, code: string) => Promise<{ success: boolean; message: string; user?: User; randomPassword?: string }>;
+  onResetPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  onSetPassword: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
 }
 
 /**
@@ -40,12 +40,12 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // 当对话框打开时，清空提示信息并设置为登录模式
   useEffect(() => {
     if (isOpen) {
-      setStatus(null);
+      setStatusMessage(null);
       setMode('login');
     }
   }, [isOpen]);
@@ -56,43 +56,77 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setStatus(null);
-    
+    setStatusMessage(null);
+
     try {
+      let result;
       switch (mode) {
         case 'login':
-          await onLogin(email, passwordValue);
-          toast.success(t('auth.loginSuccess'));
-          onClose();
-          break;
-        case 'register':
-          await onRegister(email, name, passwordValue, confirmPassword);
-          toast.success(t('auth.registerSuccess'));
-          setMode('verify');
-          break;
-        case 'verify':
-          const result = await onVerifyCode(email, code);
+          result = await onLogin(email, passwordValue);
           if (result.success) {
-            toast.success(t('auth.verifySuccess'));
-            onClose();
+            setStatusMessage({ type: 'success', message: result.message });
+            setTimeout(() => {
+              onClose();
+            }, 1500);
           } else {
-            setStatus({ type: 'error', message: result.message });
+            setStatusMessage({ type: 'error', message: result.message });
           }
           break;
-        case 'reset':
-          await onResetPassword(email);
-          toast.success(t('auth.resetPasswordSuccess'));
-          setMode('verify');
+
+        case 'register':
+          result = await onRegister(email, name, passwordValue, confirmPassword);
+          if (result.success) {
+            setStatusMessage({ type: 'success', message: result.message });
+            setMode('verify');
+          } else {
+            setStatusMessage({ type: 'error', message: result.message });
+          }
           break;
+
+        case 'verify':
+          result = await onVerifyCode(email, code);
+          if (result.success) {
+            setStatusMessage({ 
+              type: 'success', 
+              message: result.message + (result.randomPassword ? `\n${t('auth.yourPassword')}: ${result.randomPassword}` : '') 
+            });
+            if (result.user) {
+              setTimeout(() => {
+                onClose();
+              }, 1500);
+            }
+          } else {
+            setStatusMessage({ type: 'error', message: result.message });
+          }
+          break;
+
+        case 'reset':
+          result = await onResetPassword(email);
+          if (result.success) {
+            setStatusMessage({ type: 'success', message: result.message });
+            setMode('verify');
+          } else {
+            setStatusMessage({ type: 'error', message: result.message });
+          }
+          break;
+
         case 'setPassword':
-          await onSetPassword(email, passwordValue);
-          toast.success(t('auth.setPasswordSuccess'));
-          setMode('login');
+          result = await onSetPassword(email, passwordValue);
+          if (result.success) {
+            setStatusMessage({ type: 'success', message: result.message });
+            setTimeout(() => {
+              onClose();
+            }, 1500);
+          } else {
+            setStatusMessage({ type: 'error', message: result.message });
+          }
           break;
       }
-    } catch (error) {
-      console.error('认证操作失败:', error);
-      toast.error(error instanceof Error ? error.message : t('auth.error.networkError'));
+    } catch (error: any) {
+      setStatusMessage({ 
+        type: 'error', 
+        message: error.message || t('auth.error.networkError') 
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -255,14 +289,29 @@ const AuthModal: React.FC<AuthModalProps> = ({
               <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="code">
                 {t('auth.verificationCode')}
               </label>
-              <input
-                id="code"
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+              <div className="flex space-x-2">
+                <input
+                  id="code"
+                  type="text"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    </div>
+                  ) : (
+                    t('auth.verify')
+                  )}
+                </button>
+              </div>
             </div>
           )}
 
@@ -287,6 +336,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
                   </button>
                 </div>
               </div>
+              
+              {/* 错误信息显示 */}
+              {statusMessage?.type === 'error' && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
+                  {statusMessage.message}
+                </div>
+              )}
               
               {/* 分割线 */}
               <div className="relative my-6">
@@ -322,24 +378,30 @@ const AuthModal: React.FC<AuthModalProps> = ({
             </>
           )}
 
-          {/* 其他模式的提交按钮 */}
-          {mode !== 'login' && (
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                </div>
-              ) : (
-                mode === 'register' && t('auth.register') ||
-                mode === 'verify' && t('auth.verify') ||
-                mode === 'reset' && t('auth.sendCode') ||
-                mode === 'setPassword' && t('auth.setPassword')
-              )}
-            </button>
+          {/* 注册按钮 */}
+          {mode === 'register' && (
+            <div className="mb-4">
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  </div>
+                ) : (
+                  t('auth.register')
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* 错误信息显示 */}
+          {statusMessage?.type === 'error' && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
+              {statusMessage.message}
+            </div>
           )}
         </form>
 
