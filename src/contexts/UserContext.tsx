@@ -23,8 +23,8 @@ interface UserContextType {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, name: string) => Promise<void>;
-  verifyCode: (email: string, code: string) => Promise<void>;
+  register: (email: string, name: string, password: string, confirmPassword: string) => Promise<void>;
+  verifyCode: (email: string, code: string) => Promise<{ success: boolean; message: string; user?: User; token?: string }>;
   setPassword: (email: string, password: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (email: string, code: string, password: string) => Promise<void>;
@@ -116,8 +116,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    * 注册
    * @param email 邮箱
    * @param name 姓名
+   * @param password 密码
+   * @param confirmPassword 确认密码
    */
-  const register = async (email: string, name: string) => {
+  const register = async (email: string, name: string, password: string, confirmPassword: string) => {
     setIsLoading(true);
     setError(null);
     
@@ -127,7 +129,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, name }),
+        body: JSON.stringify({ email, name, password, confirmPassword }),
       });
       
       const data = await response.json();
@@ -168,6 +170,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       
       if (!response.ok) {
         throw new Error(data.error || t('auth.verifyError'));
+      }
+      
+      // 如果验证成功，保存用户信息和令牌
+      if (data.success && data.user && data.token) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('token', data.token);
+        setUser(data.user);
       }
       
       return data;

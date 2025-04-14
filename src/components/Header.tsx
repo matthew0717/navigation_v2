@@ -62,6 +62,7 @@ export default function Header() {
       closeAuthModal();
     } catch (error) {
       console.error('Login failed:', error);
+      throw error;
     }
   };
 
@@ -69,10 +70,12 @@ export default function Header() {
    * 处理注册
    * @param email 邮箱
    * @param name 姓名
+   * @param password 密码
+   * @param confirmPassword 确认密码
    */
-  const handleRegister = async (email: string, name: string) => {
+  const handleRegister = async (email: string, name: string, password: string, confirmPassword: string) => {
     try {
-      await register(email, name);
+      await register(email, name, password, confirmPassword);
     } catch (error) {
       console.error('Registration failed:', error);
     }
@@ -82,13 +85,18 @@ export default function Header() {
    * 处理验证码验证
    * @param email 邮箱
    * @param code 验证码
+   * @returns 验证结果
    */
   const handleVerifyCode = async (email: string, code: string) => {
     try {
-      await verifyCode(email, code);
-      closeAuthModal();
+      const result = await verifyCode(email, code);
+      if (result.success) {
+        closeAuthModal();
+      }
+      return result;
     } catch (error) {
       console.error('Verification failed:', error);
+      return { success: false, message: error instanceof Error ? error.message : '验证失败' };
     }
   };
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
 
 // 用户数据文件路径
 const usersFilePath = path.join(process.cwd(), 'src/app/api/data/users.json');
@@ -23,11 +24,33 @@ export async function POST(request: Request) {
       console.log('注册请求已接收');
     }
 
-    const { email, name } = await request.json();
+    const { email, name, password, confirmPassword } = await request.json();
 
     // 开发环境日志
     if (process.env.NODE_ENV === 'development') {
       console.log('注册信息:', { email, name });
+    }
+
+    // 验证密码
+    if (!password || !confirmPassword) {
+      return NextResponse.json(
+        { error: '密码和确认密码不能为空' },
+        { status: 400 }
+      );
+    }
+
+    if (password !== confirmPassword) {
+      return NextResponse.json(
+        { error: '两次输入的密码不一致' },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: '密码长度不能少于6位' },
+        { status: 400 }
+      );
     }
 
     // 读取现有用户数据
@@ -50,11 +73,15 @@ export async function POST(request: Request) {
     const codeExpiry = new Date();
     codeExpiry.setMinutes(codeExpiry.getMinutes() + 10); // 10分钟有效期
 
+    // 加密密码
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // 创建新用户
     const newUser = {
       id: uuidv4(),
       email,
       name,
+      password: hashedPassword,
       verificationCode,
       codeExpiry: codeExpiry.toISOString(),
       isVerified: false,

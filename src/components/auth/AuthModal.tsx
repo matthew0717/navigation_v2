@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useI18n } from '@/i18n';
-import { useUser } from '@/contexts/UserContext';
+import { useUser, User } from '@/contexts/UserContext';
 import toast from 'react-hot-toast';
 
 /**
@@ -13,8 +13,8 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLogin: (email: string, password: string) => Promise<void>;
-  onRegister: (email: string, name: string) => Promise<void>;
-  onVerifyCode: (email: string, code: string) => Promise<void>;
+  onRegister: (email: string, name: string, password: string, confirmPassword: string) => Promise<void>;
+  onVerifyCode: (email: string, code: string) => Promise<{ success: boolean; message: string; user?: User; token?: string }>;
   onResetPassword: (email: string) => Promise<void>;
   onSetPassword: (email: string, password: string) => Promise<void>;
 }
@@ -35,10 +35,20 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const { verifyCode, setPassword, resetPassword, updatePassword } = useUser();
   const [mode, setMode] = useState<'login' | 'register' | 'verify' | 'reset' | 'setPassword'>('login');
   const [email, setEmail] = useState('');
-  const [password, setPasswordValue] = useState('');
+  const [passwordValue, setPasswordValue] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // 当对话框打开时，清空提示信息并设置为登录模式
+  useEffect(() => {
+    if (isOpen) {
+      setStatus(null);
+      setMode('login');
+    }
+  }, [isOpen]);
 
   /**
    * 处理表单提交
@@ -46,35 +56,38 @@ const AuthModal: React.FC<AuthModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setStatus(null);
     
     try {
       switch (mode) {
         case 'login':
-          await onLogin(email, password);
+          await onLogin(email, passwordValue);
           toast.success(t('auth.loginSuccess'));
           onClose();
           break;
         case 'register':
-          await onRegister(email, name);
+          await onRegister(email, name, passwordValue, confirmPassword);
           toast.success(t('auth.registerSuccess'));
           setMode('verify');
           break;
         case 'verify':
-          await onVerifyCode(email, code);
-          toast.success(t('auth.verifySuccess'));
-          setMode('setPassword');
+          const result = await onVerifyCode(email, code);
+          if (result.success) {
+            toast.success(t('auth.verifySuccess'));
+            onClose();
+          } else {
+            setStatus({ type: 'error', message: result.message });
+          }
           break;
         case 'reset':
           await onResetPassword(email);
-          toast.success(t('auth.resetSuccess'));
-          setMode('setPassword');
+          toast.success(t('auth.resetPasswordSuccess'));
+          setMode('verify');
           break;
         case 'setPassword':
-          if (mode === 'setPassword') {
-            await onSetPassword(email, password);
-            toast.success(t('auth.setPasswordSuccess'));
-            setMode('login');
-          }
+          await onSetPassword(email, passwordValue);
+          toast.success(t('auth.setPasswordSuccess'));
+          setMode('login');
           break;
       }
     } catch (error) {
@@ -113,6 +126,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setMode('register');
     setEmail('');
     setPasswordValue('');
+    setConfirmPassword('');
     setCode('');
   };
 
@@ -201,8 +215,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
-          {/* 密码输入 - 登录和设置密码时显示 */}
-          {(mode === 'login' || mode === 'setPassword') && (
+          {/* 密码输入 - 登录、注册和设置密码时显示 */}
+          {(mode === 'login' || mode === 'register' || mode === 'setPassword') && (
             <div className="mb-4">
               <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="password">
                 {t('auth.password')}
@@ -210,8 +224,25 @@ const AuthModal: React.FC<AuthModalProps> = ({
               <input
                 id="password"
                 type="password"
-                value={password}
+                value={passwordValue}
                 onChange={(e) => setPasswordValue(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          )}
+
+          {/* 确认密码输入 - 仅注册时显示 */}
+          {mode === 'register' && (
+            <div className="mb-4">
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="confirmPassword">
+                {t('auth.confirmPassword')}
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />

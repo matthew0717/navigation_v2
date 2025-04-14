@@ -59,6 +59,7 @@ export default {
     logout: 'Logout',
     email: 'Email',
     password: 'Password',
+    confirmPassword: 'Confirm Password',
     name: 'Username',
     verificationCode: 'Verification Code',
     sendCode: 'Send Code',
@@ -89,7 +90,9 @@ export default {
       emailExists: 'Email already registered',
       invalidCode: 'Invalid or expired verification code',
       networkError: 'Network error, please try again later',
-      serverError: 'Server error, please try again later'
+      serverError: 'Server error, please try again later',
+      passwordsDoNotMatch: 'Passwords do not match',
+      passwordTooShort: 'Password must be at least 6 characters'
     }
   },
 }; 

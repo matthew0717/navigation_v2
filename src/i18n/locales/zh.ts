@@ -59,6 +59,7 @@ export default {
     logout: '退出登录',
     email: '邮箱',
     password: '密码',
+    confirmPassword: '确认密码',
     name: '用户名',
     verificationCode: '验证码',
     sendCode: '发送验证码',
@@ -89,7 +90,9 @@ export default {
       emailExists: '该邮箱已被注册',
       invalidCode: '验证码无效或已过期',
       networkError: '网络错误，请稍后重试',
-      serverError: '服务器错误，请稍后重试'
+      serverError: '服务器错误，请稍后重试',
+      passwordsDoNotMatch: '两次输入的密码不一致',
+      passwordTooShort: '密码长度不能少于6位'
     }
   },
 }; 

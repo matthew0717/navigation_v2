@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { sign } from 'jsonwebtoken';
 
 // 获取数据文件路径
 const dataFilePath = path.join(process.cwd(), 'src/app/api/data/users.json');
@@ -46,9 +47,9 @@ export async function POST(request: NextRequest) {
     const data = readDataFile();
     
     // 查找用户
-    const user = data.users.find((u: any) => u.email === email);
+    const userIndex = data.users.findIndex((u: any) => u.email === email);
     
-    if (!user) {
+    if (userIndex === -1) {
       // 开发环境日志
       if (process.env.NODE_ENV === 'development') {
         console.log('验证失败: 用户不存在', { email });
@@ -58,6 +59,8 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+    
+    const user = data.users[userIndex];
     
     // 检查验证码是否匹配
     if (user.verificationCode !== code) {
@@ -97,9 +100,21 @@ export async function POST(request: NextRequest) {
     // 更新用户验证状态
     user.isVerified = true;
     user.updatedAt = new Date().toISOString();
+    user.lastLogin = new Date().toISOString();
     
     // 保存数据
     writeDataFile(data);
+
+    // 生成JWT令牌
+    const token = sign(
+      { 
+        id: user.id, 
+        email: user.email,
+        name: user.name
+      },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
 
     // 开发环境日志
     if (process.env.NODE_ENV === 'development') {
@@ -109,7 +124,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       message: '验证码验证成功',
-      userId: user.id
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar
+      },
+      token
     });
   } catch (error) {
     // 开发环境日志

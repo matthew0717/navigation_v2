@@ -1,16 +1,49 @@
 {
   "users": [
     {
-      "id": "31542e08-0a8b-48ad-8262-ada43daa9b33",
-      "email": "matthewxu@live.com",
-      "name": "matthewxu",
-      "verificationCode": "763272",
-      "codeExpiry": "2025-04-13T15:28:15.144Z",
+      "id": "1",
+      "email": "test@example.com",
+      "name": "测试用户",
+      "password": "$2a$10$X7UrE2J5Q5Q5Q5Q5Q5Q5QO5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q5Q",
       "isVerified": true,
-      "createdAt": "2025-04-13T15:18:15.144Z",
-      "updatedAt": "2025-04-13T15:20:23.468Z",
-      "password": "$2b$10$y5SwsAj4rJmaDdhIaoTp/.UeeBAQuz5GR3YXke2a0ayZkScY5Fypu",
-      "lastLogin": "2025-04-13T15:41:27.033Z"
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "d244c0d5-6c39-40a5-8bb3-b909c5942058",
+      "email": "matthewxuads@gmail.com",
+      "name": "matthewxu",
+      "password": "$2b$10$fCwyihXlHPEcu5e4isO.Qu86Xm1yCNlWrueo06rEmoRsgD7kU4WOO",
+      "verificationCode": "740524",
+      "codeExpiry": "2025-04-14T05:10:22.190Z",
+      "isVerified": false,
+      "createdAt": "2025-04-14T05:00:22.264Z",
+      "updatedAt": "2025-04-14T05:27:22.697Z",
+      "lastLogin": "2025-04-14T05:27:22.697Z"
+    },
+    {
+      "id": "6bdf57cc-661e-48e7-b65d-aa01f1e97855",
+      "email": "matthewxu1@live.com",
+      "name": "matthewxu",
+      "password": "$2b$10$626e/7gg79UWQkPy3VIWWeVgJDm0lailolVV6zS1Z2VUsSWzhkxPe",
+      "verificationCode": "533983",
+      "codeExpiry": "2025-04-14T05:12:33.118Z",
+      "isVerified": true,
+      "createdAt": "2025-04-14T05:02:33.187Z",
+      "updatedAt": "2025-04-14T05:02:41.611Z",
+      "lastLogin": "2025-04-14T05:02:41.611Z"
+    },
+    {
+      "id": "3ea9ecc5-f837-40d5-a9ea-e8cd6b84ea52",
+      "email": "matthewxu2@live.com",
+      "name": "matthewxu",
+      "password": "$2b$10$sgB1TexKfweS/wBTN11qLeYvOLAIlC8OAVEP95PVx1P7UIMfLvyk2",
+      "verificationCode": "851441",
+      "codeExpiry": "2025-04-14T05:37:42.714Z",
+      "isVerified": true,
+      "createdAt": "2025-04-14T05:27:42.782Z",
+      "updatedAt": "2025-04-14T08:42:18.047Z",
+      "lastLogin": "2025-04-14T08:42:18.047Z"
     }
   ],
   "verificationCodes": []
