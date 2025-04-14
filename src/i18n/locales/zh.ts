@@ -66,7 +66,7 @@ export default {
     verify: '验证',
     resetPassword: '找回密码',
     setPassword: '设置密码',
-    updatePassword: '更新密码',
+    updatePassword: '修改密码',
     noAccount: '没有账号？注册',
     haveAccount: '已有账号？登录',
     forgotPassword: '忘记密码？',
@@ -84,7 +84,9 @@ export default {
     verifySuccess: '验证码验证成功',
     setPasswordSuccess: '密码设置成功',
     resetPasswordSuccess: '验证码已发送',
-    updatePasswordSuccess: '密码更新成功',
+    updatePasswordSuccess: '密码修改成功',
+    currentPassword: '当前密码',
+    newPassword: '新密码',
     error: {
       userNotFound: '用户不存在',
       emailExists: '该邮箱已被注册',
@@ -92,7 +94,9 @@ export default {
       networkError: '网络错误，请稍后重试',
       serverError: '服务器错误，请稍后重试',
       passwordsDoNotMatch: '两次输入的密码不一致',
-      passwordTooShort: '密码长度不能少于6位'
+      passwordTooShort: '密码长度不能少于6位',
+      updatePasswordFailed: '密码修改失败',
+      currentPasswordIncorrect: '当前密码不正确',
     }
   },
 }; 

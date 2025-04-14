@@ -298,31 +298,41 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    * @param newPassword 新密码
    */
   const updatePassword = async (email: string, oldPassword: string, newPassword: string) => {
-    setLoading(true);
-    setError(null);
-    
+    console.log('开始修改密码流程:', { email });
     try {
+      console.log('发送修改密码请求...');
       const response = await fetch('/api/auth/update-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, oldPassword, newPassword }),
+        body: JSON.stringify({ 
+          email, 
+          oldPassword, 
+          newPassword
+        }),
       });
-      
+
+      console.log('修改密码请求响应状态:', response.status);
       const data = await response.json();
-      
+      console.log('修改密码请求响应数据:', data);
+
       if (!response.ok) {
-        throw new Error(data.error || t('auth.updatePasswordError'));
+        console.log('修改密码失败:', data.error || '未知错误');
+        return { 
+          success: false, 
+          message: data.error || t('auth.error.updatePasswordFailed')
+        };
       }
-      
-      return data;
+
+      console.log('修改密码成功');
+      return { success: true, message: t('auth.updatePasswordSuccess') };
     } catch (error) {
-      console.error('更新密码失败:', error);
-      setError(error instanceof Error ? error.message : t('auth.updatePasswordError'));
-      throw error;
-    } finally {
-      setLoading(false);
+      console.log('修改密码过程发生错误:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : t('auth.error.updatePasswordFailed')
+      };
     }
   };
 

@@ -61,13 +61,13 @@
       "id": "28a72439-60bb-42c3-ab95-bace08506f4e",
       "email": "matthewxu@live.com",
       "name": "1111111",
-      "password": "$2b$10$4i4WF7lXU2Bi51NXu4QxVO/tz2RsnO.WiK/eKL4MVugaAtZTpUo3K",
+      "password": "$2b$10$Mvkb1Tc.8XSVcE6ytyYY6uH3yDhm7yWjVcL/0OvhYCpvKOS25RQgW",
       "verificationCode": "177522",
       "codeExpiry": "2025-04-14T10:15:07.115Z",
       "isVerified": true,
       "createdAt": "2025-04-14T10:05:07.192Z",
-      "updatedAt": "2025-04-14T10:06:13.966Z",
-      "lastLogin": "2025-04-14T10:06:13.966Z"
+      "updatedAt": "2025-04-14T10:23:33.607Z",
+      "lastLogin": "2025-04-14T10:23:33.607Z"
     },
     {
       "id": "356327cf-562e-4f28-8e0d-ab1771922ee8",
@@ -118,5 +118,4 @@
     }
   ],
   "verificationCodes": []
-  
 }

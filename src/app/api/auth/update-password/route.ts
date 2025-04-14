@@ -31,41 +31,18 @@ const writeDataFile = (data: any) => {
 // 更新密码API处理函数
 export async function POST(request: NextRequest) {
   try {
-    const { email, code, password } = await request.json();
+    const { email, oldPassword, newPassword } = await request.json();
     
     // 验证输入
-    if (!email || !code || !password) {
+    if (!email || !oldPassword || !newPassword) {
       return NextResponse.json(
-        { error: '邮箱、验证码和密码不能为空' },
+        { error: '邮箱、旧密码和新密码不能为空' },
         { status: 400 }
       );
     }
     
     // 读取数据
     const data = readDataFile();
-    
-    // 查找验证码记录
-    const verificationRecord = data.verificationCodes.find(
-      (record: any) => record.email === email && record.code === code && !record.used
-    );
-    
-    if (!verificationRecord) {
-      return NextResponse.json(
-        { error: '验证码无效或已过期' },
-        { status: 400 }
-      );
-    }
-    
-    // 检查验证码是否过期
-    const now = new Date();
-    const expiresAt = new Date(verificationRecord.expiresAt);
-    
-    if (now > expiresAt) {
-      return NextResponse.json(
-        { error: '验证码已过期' },
-        { status: 400 }
-      );
-    }
     
     // 查找用户
     const userIndex = data.users.findIndex((user: any) => user.email === email);
@@ -77,24 +54,31 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 更新密码
-    const hashedPassword = await bcrypt.hash(password, 10);
-    data.users[userIndex].password = hashedPassword;
+    // 验证旧密码
+    const isPasswordValid = await bcrypt.compare(oldPassword, data.users[userIndex].password);
     
-    // 标记验证码为已使用
-    verificationRecord.used = true;
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: '当前密码不正确' },
+        { status: 400 }
+      );
+    }
+    
+    // 更新密码
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    data.users[userIndex].password = hashedPassword;
     
     // 保存数据
     writeDataFile(data);
     
     return NextResponse.json({ 
       success: true, 
-      message: '密码更新成功，请登录' 
+      message: '密码修改成功' 
     });
   } catch (error) {
-    console.error('更新密码失败:', error);
+    console.error('修改密码失败:', error);
     return NextResponse.json(
-      { error: '更新密码失败' },
+      { error: '修改密码失败' },
       { status: 500 }
     );
   }

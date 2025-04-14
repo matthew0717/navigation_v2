@@ -8,6 +8,7 @@ import { useUser } from "@/contexts/UserContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import AuthModal from "./auth/AuthModal";
 import UserAvatar from "./UserAvatar";
+import UpdatePasswordModal from './auth/UpdatePasswordModal';
 
 /**
  * 顶部菜单区组件
@@ -21,6 +22,8 @@ export default function Header() {
   const [activeChannel, setActiveChannel] = useState<'image' | 'video'>('image');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showUpdatePasswordModal, setShowUpdatePasswordModal] = useState(false);
 
   /**
    * 切换菜单收缩状态
@@ -231,23 +234,32 @@ export default function Header() {
           {/* 用户菜单 */}
           {user ? (
             <div className="relative">
-              <button 
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                aria-label={user.name}
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              {/* 用户头像按钮 */}
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="relative focus:outline-none"
               >
                 <UserAvatar user={user} size="md" />
               </button>
               
-              {/* 下拉菜单 */}
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10">
-                  <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+              {/* 用户下拉菜单 */}
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                  <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                     {user.email}
                   </div>
-                  <button 
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  <button
+                    onClick={() => {
+                      setShowUpdatePasswordModal(true);
+                      setShowUserMenu(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    {t('auth.updatePassword')}
+                  </button>
+                  <button
                     onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     {t('auth.logout')}
                   </button>
@@ -300,6 +312,12 @@ export default function Header() {
         onVerifyCode={handleVerifyCode}
         onResetPassword={handleResetPassword}
         onSetPassword={handleSetPassword}
+      />
+
+      {/* 修改密码模态框 */}
+      <UpdatePasswordModal
+        isOpen={showUpdatePasswordModal}
+        onClose={() => setShowUpdatePasswordModal(false)}
       />
     </header>
   );
