@@ -28,6 +28,8 @@ export interface UserContextType {
   setPassword: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   updatePassword: (email: string, oldPassword: string, newPassword: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   logout: () => void;
+  githubLogin: () => Promise<void>;
+  bindEmail: (email: string, code: string) => Promise<{ success: boolean; message: string }>;
 }
 
 /**
@@ -347,6 +349,100 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   /**
+   * GitHub 登录
+   */
+  const githubLogin = async () => {
+    try {
+      // 获取 GitHub OAuth 配置
+      const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+      const redirectUri = process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL;
+      
+      if (!clientId || !redirectUri) {
+        console.error('GitHub OAuth 配置缺失');
+        throw new Error('GitHub OAuth 配置缺失');
+      }
+      
+      // 构建 GitHub 授权 URL
+      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email`;
+      
+      // 重定向到 GitHub 授权页面
+      window.location.href = githubAuthUrl;
+    } catch (error) {
+      console.error('GitHub 登录失败:', error);
+      throw error;
+    }
+  };
+
+  // 添加检查登录状态的函数
+  const checkLoginStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/check');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user) {
+          setUser(data.user);
+        }
+      }
+    } catch (error) {
+      console.error('检查登录状态失败:', error);
+    }
+  };
+
+  // 在组件挂载时检查登录状态
+  useEffect(() => {
+    checkLoginStatus();
+  }, []);
+
+  // 在 GitHub 登录回调后检查登录状态
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('code')) {
+      checkLoginStatus();
+    }
+  }, []);
+
+  /**
+   * 绑定邮箱
+   * @param email 邮箱
+   * @param code 验证码
+   */
+  const bindEmail = async (email: string, code: string) => {
+    try {
+      const response = await fetch('/api/auth/bind-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { 
+          success: false, 
+          message: data.error || t('auth.error.bindEmailFailed')
+        };
+      }
+
+      // 更新用户信息
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+      }
+
+      return { 
+        success: true, 
+        message: t('auth.bindEmailSuccess')
+      };
+    } catch (error) {
+      console.error('绑定邮箱失败:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : t('auth.error.bindEmailFailed')
+      };
+    }
+  };
+
+  /**
    * 上下文值
    */
   const value = {
@@ -360,6 +456,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     resetPassword,
     updatePassword,
     logout,
+    githubLogin,
+    bindEmail,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

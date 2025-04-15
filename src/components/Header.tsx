@@ -17,7 +17,7 @@ import UpdatePasswordModal from './auth/UpdatePasswordModal';
  */
 export default function Header() {
   const { t } = useI18n();
-  const { user, login, register, verifyCode, resetPassword, setPassword, logout } = useUser();
+  const { user, login, register, verifyCode, resetPassword, setPassword, updatePassword, githubLogin, bindEmail, logout } = useUser();
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [activeChannel, setActiveChannel] = useState<'image' | 'video'>('image');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -335,6 +335,8 @@ export default function Header() {
         onVerifyCode={handleVerifyCode}
         onResetPassword={handleResetPassword}
         onSetPassword={handleSetPassword}
+        onGithubLogin={githubLogin}
+        onBindEmail={bindEmail}
       />
 
       {/* 修改密码模态框 */}
