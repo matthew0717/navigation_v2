@@ -66,6 +66,8 @@ export default {
     verify: '验证',
     resetPassword: '找回密码',
     setPassword: '设置密码',
+    setNewPassword: '设置新密码',
+    newPassword: '新密码',
     updatePassword: '修改密码',
     noAccount: '没有账号？注册',
     haveAccount: '已有账号？登录',
@@ -86,7 +88,8 @@ export default {
     resetPasswordSuccess: '验证码已发送',
     updatePasswordSuccess: '密码修改成功',
     currentPassword: '当前密码',
-    newPassword: '新密码',
+    yourPassword: '您的密码',
+    verifyCode: '验证码',
     error: {
       userNotFound: '用户不存在',
       emailExists: '该邮箱已被注册',
@@ -97,6 +100,6 @@ export default {
       passwordTooShort: '密码长度不能少于6位',
       updatePasswordFailed: '密码修改失败',
       currentPasswordIncorrect: '当前密码不正确',
-    }
+    },
   },
 }; 

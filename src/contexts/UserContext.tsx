@@ -23,7 +23,7 @@ export interface UserContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string; user?: User }>;
   register: (email: string, name: string, password: string, confirmPassword: string) => Promise<{ success: boolean; message: string }>;
-  verifyCode: (email: string, code: string) => Promise<{ success: boolean; message: string; user?: User; randomPassword?: string }>;
+  verifyCode: (email: string, code: string, newPassword?: string) => Promise<{ success: boolean; message: string; user?: User; randomPassword?: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   setPassword: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   updatePassword: (email: string, oldPassword: string, newPassword: string) => Promise<{ success: boolean; message?: string; user?: User }>;
@@ -164,9 +164,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
    * 验证验证码
    * @param email 邮箱
    * @param code 验证码
+   * @param newPassword 新密码（可选）
    */
-  const verifyCode = async (email: string, code: string) => {
-    console.log('开始验证码验证流程:', { email, code });
+  const verifyCode = async (email: string, code: string, newPassword?: string) => {
+    console.log('开始验证码验证流程:', { email, code, hasNewPassword: !!newPassword });
     try {
       console.log('发送验证码验证请求...');
       const response = await fetch('/api/auth/verify', {
@@ -174,7 +175,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, code }),
+        body: JSON.stringify({ email, code, newPassword }),
       });
 
       console.log('验证码验证请求响应状态:', response.status);
@@ -199,7 +200,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
       return { 
         success: true, 
-        message: t('auth.verifySuccess'),
+        message: data.message || t('auth.verifySuccess'),
         user: data.user,
         randomPassword: data.randomPassword
       };

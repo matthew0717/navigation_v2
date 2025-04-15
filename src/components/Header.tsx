@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useI18n } from "@/i18n";
@@ -24,6 +24,25 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showUpdatePasswordModal, setShowUpdatePasswordModal] = useState(false);
+
+  // 添加点击外部关闭下拉菜单的功能
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const userMenu = document.getElementById('user-menu');
+      const userAvatar = document.getElementById('user-avatar');
+      
+      if (showUserMenu && userMenu && userAvatar) {
+        if (!userMenu.contains(event.target as Node) && !userAvatar.contains(event.target as Node)) {
+          setShowUserMenu(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   /**
    * 切换菜单收缩状态
@@ -236,6 +255,7 @@ export default function Header() {
             <div className="relative">
               {/* 用户头像按钮 */}
               <button
+                id="user-avatar"
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="relative focus:outline-none"
               >
@@ -244,7 +264,10 @@ export default function Header() {
               
               {/* 用户下拉菜单 */}
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                <div 
+                  id="user-menu"
+                  className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50"
+                >
                   <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
                     {user.email}
                   </div>

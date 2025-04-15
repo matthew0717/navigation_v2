@@ -19,6 +19,8 @@ interface AuthModalProps {
   onSetPassword: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
 }
 
+type AuthMode = 'login' | 'register' | 'verify' | 'reset' | 'setPassword';
+
 /**
  * 认证模态框组件
  */
@@ -33,7 +35,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const { t } = useI18n();
   const { verifyCode, setPassword, resetPassword, updatePassword } = useUser();
-  const [mode, setMode] = useState<'login' | 'register' | 'verify' | 'reset' | 'setPassword'>('login');
+  const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [passwordValue, setPasswordValue] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -84,19 +86,41 @@ const AuthModal: React.FC<AuthModalProps> = ({
           break;
 
         case 'verify':
-          result = await onVerifyCode(email, code);
-          if (result.success) {
-            setStatusMessage({ 
-              type: 'success', 
-              message: result.message + (result.randomPassword ? `\n${t('auth.yourPassword')}: ${result.randomPassword}` : '') 
+          // 检查密码是否匹配
+          if (passwordValue !== confirmPassword) {
+            setStatusMessage({
+              type: 'error',
+              message: t('auth.error.passwordsDoNotMatch')
             });
-            if (result.user) {
-              setTimeout(() => {
-                onClose();
-              }, 1500);
-            }
+            setIsSubmitting(false);
+            return;
+          }
+          
+          // 检查密码长度
+          if (passwordValue.length < 6) {
+            setStatusMessage({
+              type: 'error',
+              message: t('auth.error.passwordTooShort')
+            });
+            setIsSubmitting(false);
+            return;
+          }
+          
+          // 验证码验证并设置新密码
+          result = await verifyCode(email, code, passwordValue);
+          if (result.success) {
+            setStatusMessage({
+              type: 'success',
+              message: result.message
+            });
+            setTimeout(() => {
+              onClose();
+            }, 1500);
           } else {
-            setStatusMessage({ type: 'error', message: result.message });
+            setStatusMessage({
+              type: 'error',
+              message: result.message
+            });
           }
           break;
 
@@ -284,34 +308,60 @@ const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           {/* 验证码输入 - 验证和设置密码时显示 */}
-          {(mode === 'verify' || mode === 'setPassword') && (
-            <div className="mb-4">
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="code">
-                {t('auth.verificationCode')}
-              </label>
-              <div className="flex space-x-2">
+          {mode === 'verify' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('auth.verificationCode')}
+                </label>
                 <input
-                  id="code"
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
                   required
                 />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    </div>
-                  ) : (
-                    t('auth.verify')
-                  )}
-                </button>
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('auth.newPassword')}
+                </label>
+                <input
+                  type="password"
+                  value={passwordValue}
+                  onChange={(e) => setPasswordValue(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('auth.confirmPassword')}
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+                  required
+                />
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors"
+                disabled={isSubmitting || !code || !passwordValue || !confirmPassword}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  </div>
+                ) : (
+                  t('auth.verify')
+                )}
+              </button>
             </div>
           )}
 

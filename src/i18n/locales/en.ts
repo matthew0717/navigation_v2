@@ -85,6 +85,10 @@ export default {
     setPasswordSuccess: 'Password set successfully',
     resetPasswordSuccess: 'Verification code sent',
     updatePasswordSuccess: 'Password updated successfully',
+    currentPassword: 'Current Password',
+    newPassword: 'New Password',
+    yourPassword: 'Your Password',
+    verifyCode: 'Verification Code',
     error: {
       userNotFound: 'User not found',
       emailExists: 'Email already registered',
@@ -92,7 +96,8 @@ export default {
       networkError: 'Network error, please try again later',
       serverError: 'Server error, please try again later',
       passwordsDoNotMatch: 'Passwords do not match',
-      passwordTooShort: 'Password must be at least 6 characters'
+      passwordTooShort: 'Password must be at least 6 characters',
+      currentPasswordIncorrect: 'Current password is incorrect',
     }
   },
 }; 

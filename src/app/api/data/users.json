@@ -61,13 +61,13 @@
       "id": "28a72439-60bb-42c3-ab95-bace08506f4e",
       "email": "matthewxu@live.com",
       "name": "1111111",
-      "password": "$2b$10$Mvkb1Tc.8XSVcE6ytyYY6uH3yDhm7yWjVcL/0OvhYCpvKOS25RQgW",
-      "verificationCode": "177522",
-      "codeExpiry": "2025-04-14T10:15:07.115Z",
+      "password": "$2b$10$TBE8CytqO3AxWKz7GCLYRuhi3JSAoJwh5bamlmDWn9WDaIBmEJ8Jm",
+      "verificationCode": null,
+      "codeExpiry": null,
       "isVerified": true,
       "createdAt": "2025-04-14T10:05:07.192Z",
-      "updatedAt": "2025-04-14T10:23:33.607Z",
-      "lastLogin": "2025-04-14T10:23:33.607Z"
+      "updatedAt": "2025-04-15T04:54:19.278Z",
+      "lastLogin": "2025-04-15T04:54:19.278Z"
     },
     {
       "id": "356327cf-562e-4f28-8e0d-ab1771922ee8",
@@ -113,9 +113,59 @@
       "codeExpiry": "2025-04-14T10:22:44.042Z",
       "isVerified": true,
       "createdAt": "2025-04-14T10:12:44.109Z",
-      "updatedAt": "2025-04-14T10:13:01.592Z",
-      "lastLogin": "2025-04-14T10:13:01.592Z"
+      "updatedAt": "2025-04-15T03:27:09.274Z",
+      "lastLogin": "2025-04-15T03:27:09.274Z"
     }
   ],
-  "verificationCodes": []
+  "verificationCodes": [
+    {
+      "email": "matthewxu@live.com",
+      "code": "934329",
+      "createdAt": "2025-04-15T03:12:38.081Z",
+      "expiresAt": "2025-04-15T03:22:38.081Z",
+      "used": false
+    },
+    {
+      "email": "matthewxu@live.com",
+      "code": "169435",
+      "createdAt": "2025-04-15T04:40:29.546Z",
+      "expiresAt": "2025-04-15T04:50:29.546Z",
+      "used": true
+    },
+    {
+      "email": "matthewxu@live.com",
+      "code": "171858",
+      "createdAt": "2025-04-15T04:43:16.961Z",
+      "expiresAt": "2025-04-15T04:53:16.961Z",
+      "used": true
+    },
+    {
+      "email": "matthewxu@live.com",
+      "code": "483999",
+      "createdAt": "2025-04-15T04:44:18.012Z",
+      "expiresAt": "2025-04-15T04:54:18.012Z",
+      "used": false
+    },
+    {
+      "email": "matthewxu@live.com",
+      "code": "177916",
+      "createdAt": "2025-04-15T04:47:00.031Z",
+      "expiresAt": "2025-04-15T04:57:00.031Z",
+      "used": true
+    },
+    {
+      "email": "matthewxu@live.com",
+      "code": "827603",
+      "createdAt": "2025-04-15T04:49:32.367Z",
+      "expiresAt": "2025-04-15T04:59:32.367Z",
+      "used": true
+    },
+    {
+      "email": "matthewxu@live.com",
+      "code": "241968",
+      "createdAt": "2025-04-15T04:51:42.903Z",
+      "expiresAt": "2025-04-15T05:01:42.903Z",
+      "used": true
+    }
+  ]
 }

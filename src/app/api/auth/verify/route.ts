@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { sign } from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 // 获取数据文件路径
 const dataFilePath = path.join(process.cwd(), 'src/app/api/data/users.json');
@@ -13,7 +14,7 @@ const readDataFile = () => {
     return JSON.parse(data);
   } catch (error) {
     console.error('读取数据文件失败:', error);
-    return { users: [] };
+    return { users: [], verificationCodes: [] };
   }
 };
 
@@ -36,11 +37,11 @@ export async function POST(request: NextRequest) {
       console.log('验证码验证请求已接收');
     }
 
-    const { email, code } = await request.json();
+    const { email, code, newPassword } = await request.json();
 
     // 开发环境日志
     if (process.env.NODE_ENV === 'development') {
-      console.log('验证信息:', { email, code });
+      console.log('验证信息:', { email, code, hasNewPassword: !!newPassword });
     }
 
     // 读取数据
@@ -55,44 +56,67 @@ export async function POST(request: NextRequest) {
         console.log('验证失败: 用户不存在', { email });
       }
       return NextResponse.json(
-        { error: '用户不存在' },
+        { error: 'auth.error.userNotFound' },
         { status: 404 }
       );
     }
     
     const user = data.users[userIndex];
     
-    // 检查验证码是否匹配
-    if (user.verificationCode !== code) {
+    // 检查验证码是否匹配 - 首先检查用户对象中的验证码
+    let isCodeValid = false;
+    let codeExpiry = null;
+    
+    // 检查用户对象中的验证码
+    if (user.verificationCode === code) {
+      isCodeValid = true;
+      codeExpiry = user.codeExpiry;
+    }
+    
+    // 如果用户对象中没有匹配的验证码，检查verificationCodes数组
+    if (!isCodeValid && data.verificationCodes && data.verificationCodes.length > 0) {
+      const verificationCodeIndex = data.verificationCodes.findIndex(
+        (vc: any) => vc.email === email && vc.code === code && !vc.used
+      );
+      
+      if (verificationCodeIndex !== -1) {
+        isCodeValid = true;
+        codeExpiry = data.verificationCodes[verificationCodeIndex].expiresAt;
+        
+        // 标记验证码为已使用
+        data.verificationCodes[verificationCodeIndex].used = true;
+      }
+    }
+    
+    if (!isCodeValid) {
       // 开发环境日志
       if (process.env.NODE_ENV === 'development') {
         console.log('验证失败: 验证码不匹配', { 
           email, 
-          providedCode: code, 
-          expectedCode: user.verificationCode 
+          providedCode: code
         });
       }
       return NextResponse.json(
-        { error: '验证码错误' },
+        { error: 'auth.error.invalidCode' },
         { status: 400 }
       );
     }
     
     // 检查验证码是否过期
     const now = new Date();
-    const codeExpiry = new Date(user.codeExpiry);
+    const expiryDate = new Date(codeExpiry);
     
-    if (now > codeExpiry) {
+    if (now > expiryDate) {
       // 开发环境日志
       if (process.env.NODE_ENV === 'development') {
         console.log('验证失败: 验证码已过期', { 
           email, 
-          expiryTime: codeExpiry,
+          expiryTime: expiryDate,
           currentTime: now
         });
       }
       return NextResponse.json(
-        { error: '验证码已过期' },
+        { error: 'auth.error.invalidCode' },
         { status: 400 }
       );
     }
@@ -101,6 +125,22 @@ export async function POST(request: NextRequest) {
     user.isVerified = true;
     user.updatedAt = new Date().toISOString();
     user.lastLogin = new Date().toISOString();
+    
+    // 如果提供了新密码，则更新密码
+    if (newPassword) {
+      // 开发环境日志
+      if (process.env.NODE_ENV === 'development') {
+        console.log('设置新密码:', { email });
+      }
+      
+      // 加密新密码
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+      
+      // 清除验证码
+      user.verificationCode = null;
+      user.codeExpiry = null;
+    }
     
     // 保存数据
     writeDataFile(data);
@@ -118,12 +158,12 @@ export async function POST(request: NextRequest) {
 
     // 开发环境日志
     if (process.env.NODE_ENV === 'development') {
-      console.log('验证成功:', { userId: user.id, email });
+      console.log('验证成功:', { userId: user.id, email, hasNewPassword: !!newPassword });
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: '验证码验证成功',
+      message: newPassword ? 'auth.setPasswordSuccess' : 'auth.verifySuccess',
       user: {
         id: user.id,
         email: user.email,
@@ -138,7 +178,7 @@ export async function POST(request: NextRequest) {
       console.error('验证码验证失败:', error);
     }
     return NextResponse.json(
-      { error: '验证码验证失败' },
+      { error: 'auth.error.serverError' },
       { status: 500 }
     );
   }
